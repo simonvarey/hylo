@@ -329,6 +329,13 @@ extension Diagnostic {
       notes: candidates.map { .note("candidate here", at: ast[$0].site) })
   }
 
+  static func error(
+    noViableCandidateForOverload expr: NameExpr.ID, in ast: AST
+  ) -> Diagnostic {
+    .error(
+      "no overloads match use of '\(ast[expr].name.value)'", at: ast[expr].site )
+  }
+
   static func error(cannotExtend t: AnyType, at site: SourceRange) -> Diagnostic {
     .error("cannot extend type '\(t)'", at: site)
   }
