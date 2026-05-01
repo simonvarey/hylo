@@ -12,6 +12,9 @@
 \#*ediff-merge*#
 /.idea
 
+# Containers
+.devcontainer
+
 # Misc
 /Examples/**.vir
 /Examples/**.json
