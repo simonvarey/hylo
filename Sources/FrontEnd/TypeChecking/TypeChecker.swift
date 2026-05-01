@@ -3252,7 +3252,11 @@ struct TypeChecker: Sendable {
     _ n: NameResolutionResult.ResolvedComponent
   ) -> AnyType? {
     guard let pick = n.candidates.uniqueElement else {
-      report(.error(ambiguousUse: n.component, in: program.ast))
+      if n.candidates.isEmpty {
+        report(.error(noViableCandidateForOverload: n.component, in: program.ast))
+      } else {
+        report(.error(ambiguousUse: n.component, in: program.ast))
+      }
       return nil
     }
 
