@@ -330,6 +330,14 @@ extension Diagnostic {
   }
 
   static func error(
+    ambiguousUse2 expr: NameExpr.ID, in ast: AST, candidates: [AnyDeclID] = []
+  ) -> Diagnostic {
+    .error(
+      "2 ambiguous use of '\(ast[expr].name.value)'", at: ast[expr].site,
+      notes: candidates.map { .note("candidate here", at: ast[$0].site) })
+  }
+
+  static func error(
     noViableCandidateForOverload expr: NameExpr.ID, in ast: AST
   ) -> Diagnostic {
     .error(

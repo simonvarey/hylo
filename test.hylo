@@ -1,0 +1,7 @@
+@ffi("malloc")
+fun malloc(_ size: Int) -> MemoryAddress
+
+public fun main() {
+  let out = malloc(1)
+  let _ = UTF8Array(taking_ownership_of: out)
+}

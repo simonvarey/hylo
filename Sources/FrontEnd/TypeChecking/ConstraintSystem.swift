@@ -781,7 +781,7 @@ struct ConstraintSystem {
     return formAmbiguousSolution(
       results,
       diagnosedBy: .error(
-        ambiguousUse: goal.overloadedExpr,
+        ambiguousUse2: goal.overloadedExpr,
         in: checker.program.ast,
         candidates: results.elements.compactMap(\.choice.reference.decl)))
   }
