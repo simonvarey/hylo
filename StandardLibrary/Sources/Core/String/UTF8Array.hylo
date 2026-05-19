@@ -211,7 +211,7 @@ public type UTF8Array: Regular {
 
     // Both `self` and `other` are inline and their sum would fit in inline storage.
     if (sum_length < 8) && self.is_inline() && other.is_inline() {
-      var units = self.units
+      var units = self.units.copy()
       let other_length = UInt64(truncating_or_extending: other.count()) << 2
       &units += other_length
       var write_index = self.count() * 8
@@ -219,7 +219,7 @@ public type UTF8Array: Regular {
       while read_index < other.count() {
         &write_index += 8
         &units += UInt64(truncating_or_extending: other[read_index]) << write_index
-        read_index += 1
+        &read_index += 1
       }
       return .new(units: units)
     }
@@ -235,7 +235,7 @@ public type UTF8Array: Regular {
 
       let header = PointerToMutable<Header>(type_punning: storage)
       let capacity = buffer_size - MemoryLayout<Header>.stride() - 1
-      header.unsafe_initialize_pointee((count: sum_length, capacity: capacity.copy()))
+      header.unsafe_initialize_pointee((count: sum_length.copy(), capacity: capacity.copy()))
 
       let payload = PointerToMutable<Int8>(type_punning: header.advance(by: 1))
       payload.unsafe_initialize(copying_bytes_from: self.nullterminated, count: self.count())
