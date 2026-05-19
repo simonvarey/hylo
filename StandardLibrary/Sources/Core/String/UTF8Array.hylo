@@ -195,6 +195,63 @@ public type UTF8Array: Regular {
     Pointer<Header>(bit_pattern: UInt(truncating_or_extending: units & ~(0b11 as UInt64)))
   }
 
+  /// Concatenates two arrays, returning a new array. 
+  public fun infix+ (_ other: sink Self) sink -> Self {
+    // `self` is empty
+    if (self.count() == 0) {
+      return other
+    }
+
+    // `other` is empty
+    if (other.count() == 0) {
+      return other
+    }
+
+    let sum_length = self.count() + other.count()
+
+    // Both `self` and `other` are inline and their sum would fit in inline storage.
+    if (sum_length < 8) && self.is_inline() && other.is_inline() {
+      var units = self.units
+      let other_length = UInt64(truncating_or_extending: other.count()) << 2
+      &units += other_length
+      var write_index = self.count() * 8
+      var read_index = 0
+      while read_index < other.count() {
+        &write_index += 8
+        &units += UInt64(truncating_or_extending: other[read_index]) << write_index
+        read_index += 1
+      }
+      return .new(units: units)
+    }
+
+    #if feature(freestanding)
+      fatal_error("cannot allocate heap storage in free-standing environment")
+    #else
+      let buffer_size = (MemoryLayout<Header>.stride() + sum_length + 1)
+        .round_up_nearest_power_two()
+      let storage = MemoryAddress.allocate_bytes(
+        count: buffer_size,
+        aligned_at: MemoryLayout<Header>.alignment())
+
+      let header = PointerToMutable<Header>(type_punning: storage)
+      let capacity = buffer_size - MemoryLayout<Header>.stride() - 1
+      header.unsafe_initialize_pointee((count: sum_length, capacity: capacity.copy()))
+
+      let payload = PointerToMutable<Int8>(type_punning: header.advance(by: 1))
+      payload.unsafe_initialize(copying_bytes_from: self.nullterminated, count: self.count())
+
+      payload.advance(by: self.count()).unsafe_initialize(
+        copying_bytes_from: other.nullterminated, count: other.count()
+      )
+
+      // Zero-initialize the remainder of the buffer to guarantee that it is null-terminated.
+      payload.advance(by: other.count())
+        .unsafe_initialize(repeating: 0, count: capacity - sum_length)
+
+      return .new(taking_ownership_of: storage)
+    #endif
+  }
+
 }
 
 public conformance UTF8Array: Deinitializable {
