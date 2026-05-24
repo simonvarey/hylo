@@ -204,7 +204,7 @@ public type UTF8Array: Regular {
 
     // `other` is empty
     if (other.count() == 0) {
-      return other
+      return self
     }
 
     let sum_length = self.count() + other.count()
@@ -245,7 +245,7 @@ public type UTF8Array: Regular {
       )
 
       // Zero-initialize the remainder of the buffer to guarantee that it is null-terminated.
-      payload.advance(by: other.count())
+      payload.advance(by: self.count() + other.count())
         .unsafe_initialize(repeating: 0, count: capacity - sum_length)
 
       return .new(taking_ownership_of: storage)
