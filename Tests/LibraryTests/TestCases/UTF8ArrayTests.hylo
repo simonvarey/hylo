@@ -13,9 +13,13 @@ fun test_concat_one_empty() {
   let c = a.copy() + b.copy()
   precondition(c.count() == 4)
   precondition(c == "test".utf8)
-  let d = b + a
+  let d = b.copy() + a
   precondition(d.count() == 4)
   precondition(d == "test".utf8)
+  let e = "test123456789".utf8
+  let f = e + b
+  precondition(f.count() == 13)
+  precondition(f == "test123456789".utf8)
 }
 
 fun test_concat_both_full() {
@@ -24,9 +28,13 @@ fun test_concat_both_full() {
   let c = a.copy() + b.copy()
   precondition(c.count() == 26)
   precondition(c == "test123456789check23456789".utf8)
-  let d = b + a
+  let d = b + a.copy()
   precondition(d.count() == 26)
   precondition(d == "check23456789test123456789".utf8)
+  let e = "test".utf8
+  let f = a + e
+  precondition(f.count() == 17)
+  precondition(f == "test123456789test".utf8)
 }
 
 public fun main() {
